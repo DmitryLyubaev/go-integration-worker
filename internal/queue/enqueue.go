@@ -7,6 +7,8 @@ import (
 	"github.com/DmitryLyubaev/go-integration-worker/internal/domain"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 	"strings"
 	"time"
 )
@@ -51,7 +53,9 @@ func scan(row pgx.Row) (Job, error) {
 func (s *Store) Enqueue(ctx context.Context, p domain.Payload) (Job, bool, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
-	tag, err := s.pool.Exec(ctx, "INSERT INTO worker.jobs(event_id,payload,hash) VALUES($1,$2,$3) ON CONFLICT DO NOTHING", p.Event.EventID, p.Bytes, p.Hash)
+	carrier := propagation.MapCarrier{}
+	otel.GetTextMapPropagator().Inject(ctx, carrier)
+	tag, err := s.pool.Exec(ctx, "INSERT INTO worker.jobs(event_id,payload,hash,traceparent) VALUES($1,$2,$3,$4) ON CONFLICT DO NOTHING", p.Event.EventID, p.Bytes, p.Hash, carrier.Get("traceparent"))
 	if err != nil {
 		return Job{}, false, err
 	}

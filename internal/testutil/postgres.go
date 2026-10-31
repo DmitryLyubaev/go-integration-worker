@@ -7,6 +7,7 @@ import (
 	"github.com/DmitryLyubaev/go-integration-worker/migrations"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"net/url"
 	"os"
 	"testing"
 	"time"
@@ -75,5 +76,14 @@ func PostgreSQL(t *testing.T) Database {
 		t.Fatal(err)
 	}
 	t.Cleanup(rp.Close)
-	return Database{pool, wp, rp, workerConfig.ConnString(), receiverConfig.ConnString()}
+	workerURL, e := url.Parse(dsn)
+	if e != nil || workerURL.Scheme != "postgres" {
+		t.Fatal("test DSN must be a PostgreSQL URI")
+	}
+	workerURL.Path = "/" + name
+	workerURL.RawPath = ""
+	workerURL.User = url.UserPassword("p27_worker", "p27-local-worker")
+	receiverURL := *workerURL
+	receiverURL.User = url.UserPassword("p27_receiver", "p27-local-receiver")
+	return Database{pool, wp, rp, workerURL.String(), receiverURL.String()}
 }

@@ -5,7 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/DmitryLyubaev/go-integration-worker/internal/domain"
+	"github.com/DmitryLyubaev/go-integration-worker/internal/telemetry"
 	"github.com/jackc/pgx/v5"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"log/slog"
 	"net/http"
 	"sync/atomic"
@@ -21,6 +24,7 @@ func NewHandler(s *Store, f *FaultController) http.Handler {
 			return
 		}
 		n := active.Add(1)
+		trace.SpanFromContext(r.Context()).SetAttributes(attribute.String("event_id", p.Event.EventID))
 		defer active.Add(-1)
 		slog.Info("receiver.request", "event_id", p.Event.EventID, "inflight", n)
 		fault, ordinal := f.next(p.Event.EventID)
@@ -35,7 +39,7 @@ func NewHandler(s *Store, f *FaultController) http.Handler {
 				http.Error(w, "gate expired", 503)
 				return
 			}
-			ctx = context.Background()
+			ctx = context.WithoutCancel(r.Context())
 		}
 		receipt, created, e := s.Apply(ctx, p)
 		if errors.Is(e, ErrConflict) {
@@ -85,7 +89,7 @@ func NewHandler(s *Store, f *FaultController) http.Handler {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"protocol":"p27-receiver-v1"}`))
 	})
-	return mux
+	return telemetry.Handler(mux)
 }
 func closeResponse(w http.ResponseWriter) {
 	if hijacker, ok := w.(http.Hijacker); ok {

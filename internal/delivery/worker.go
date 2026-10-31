@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"github.com/DmitryLyubaev/go-integration-worker/internal/domain"
 	"github.com/DmitryLyubaev/go-integration-worker/internal/queue"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/propagation"
 	"log/slog"
 	"sync"
 	"time"
@@ -126,6 +129,12 @@ func loop(claimCtx, workCtx context.Context, store *queue.Store, client *Client,
 	}
 }
 func send(ctx context.Context, client *Client, claim queue.Claim) domain.Outcome {
+	ctx = otel.GetTextMapPropagator().Extract(ctx, propagation.MapCarrier{"traceparent": claim.Job.Traceparent})
+	ctx, span := otel.Tracer("p27").Start(ctx, "attempt")
+	defer span.End()
+	span.SetAttributes(attribute.String("event_id", claim.Job.Payload.Event.EventID), attribute.Int("attempt", claim.Attempt))
 	slog.Info("worker.send", "event_id", claim.Job.Payload.Event.EventID, "attempt", claim.Attempt)
-	return client.Send(ctx, claim.Job.Payload)
+	outcome := client.Send(ctx, claim.Job.Payload)
+	span.SetAttributes(attribute.String("outcome", string(outcome.Kind)), attribute.Bool("ambiguous", outcome.Ambiguous))
+	return outcome
 }

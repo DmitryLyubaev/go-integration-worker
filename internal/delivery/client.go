@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/DmitryLyubaev/go-integration-worker/internal/domain"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 	"io"
 	"net"
 	"net/http"
@@ -40,6 +42,7 @@ func (c *Client) Send(ctx context.Context, p domain.Payload) domain.Outcome {
 	}
 	request.GetBody = nil
 	request.Header.Set("Content-Type", "application/json")
+	otel.GetTextMapPropagator().Inject(ctx, propagation.HeaderCarrier(request.Header))
 	response, e := c.http.Do(request)
 	if e != nil {
 		kind := domain.Retryable
