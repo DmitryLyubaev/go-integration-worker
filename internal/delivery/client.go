@@ -13,7 +13,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -52,13 +51,13 @@ func (c *Client) Send(ctx context.Context, p domain.Payload) domain.Outcome {
 		return domain.Outcome{Kind: kind, Ambiguous: true, Reason: "HTTP transport failure"}
 	}
 	defer response.Body.Close()
-	raw, e := io.ReadAll(io.LimitReader(response.Body, 4097))
-	if e != nil || len(raw) > 4096 {
-		return domain.Outcome{Kind: domain.Retryable, Ambiguous: true, Reason: "incomplete or oversized HTTP response"}
-	}
 	reason := fmt.Sprintf("HTTP %d", response.StatusCode)
 	switch response.StatusCode {
 	case 200, 201:
+		raw, readError := io.ReadAll(io.LimitReader(response.Body, 4097))
+		if readError != nil || len(raw) > 4096 {
+			return domain.Outcome{Kind: domain.Retryable, Ambiguous: true, Reason: "incomplete or oversized success response"}
+		}
 		var receipt domain.Receipt
 		if e = json.Unmarshal(raw, &receipt); e != nil || receipt.EventID != p.Event.EventID || receipt.PayloadHash != p.Hash || receipt.ReceiptID == "" {
 			return domain.Outcome{Kind: domain.Retryable, Ambiguous: true, Reason: "mismatched success receipt"}
@@ -70,6 +69,9 @@ func (c *Client) Send(ctx context.Context, p domain.Payload) domain.Outcome {
 		out := domain.Outcome{Kind: domain.Retryable, Reason: reason}
 		if response.StatusCode == 429 {
 			out.RetryAfter = retryAfter(response.Header.Get("Retry-After"), time.Now())
+			if out.RetryAfter > time.Second {
+				out.Reason += "; Retry-After exceeds demonstration limit"
+			}
 		}
 		return out
 	default:
@@ -77,14 +79,23 @@ func (c *Client) Send(ctx context.Context, p domain.Payload) domain.Outcome {
 	}
 }
 func retryAfter(value string, now time.Time) time.Duration {
-	if seconds, e := strconv.ParseInt(value, 10, 64); e == nil {
-		if seconds > 1 {
-			return 2 * time.Second
+	value = strings.TrimSpace(value)
+	digits := value != ""
+	for _, character := range value {
+		if character < '0' || character > '9' {
+			digits = false
+			break
 		}
-		if seconds > 0 {
-			return time.Duration(seconds) * time.Second
+	}
+	if digits {
+		normalized := strings.TrimLeft(value, "0")
+		if normalized == "" {
+			return 0
 		}
-		return 0
+		if normalized == "1" {
+			return time.Second
+		}
+		return 2 * time.Second
 	}
 	if date, e := http.ParseTime(value); e == nil {
 		duration := date.Sub(now)

@@ -4,6 +4,7 @@ $productRoot=Split-Path -Parent $PSScriptRoot
 $run=Join-Path $PSScriptRoot 'run.ps1'
 $outputRoot=Join-Path $productRoot ('.local/checks/'+[DateTime]::UtcNow.ToString('yyyyMMddTHHmmssfffZ'))
 New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
+if ($Profile -eq 'All') { & (Join-Path $PSScriptRoot 'test-demo-cleanup.ps1') | Tee-Object -FilePath (Join-Path $outputRoot 'orchestration.log') }
 function Invoke-Check([string]$Name,[string[]]$CommandArguments) {
   $logPath=Join-Path $outputRoot ($Name+'.jsonl')
   [IO.File]::WriteAllText($logPath,'')
@@ -25,6 +26,6 @@ $fail=@($events | Where-Object { $_.Action -eq 'fail' -and $_.Test }).Count
 $skip=@($events | Where-Object { $_.Action -eq 'skip' -and $_.Test }).Count
 if ($pass -lt 1 -or $fail -ne 0 -or $skip -ne 0) { throw 'Missing/failed/skipped required test events' }
 if ($Profile -eq 'All') { $null=Invoke-Check 'race' @('go','test','-race','-p','1','-timeout','90s','-count=1','./...') }
-$summary=[ordered]@{Profile=$Profile;PassedTestEvents=$pass;FailedTestEvents=$fail;SkippedTestEvents=$skip;Output=$outputRoot;SoftwareOnly=$true}
+$summary=[ordered]@{Profile=$Profile;PassedTestEvents=$pass;FailedTestEvents=$fail;SkippedTestEvents=$skip;PreparationCleanupCases=$(if ($Profile -eq 'All') {2} else {0});Output=$outputRoot;SoftwareOnly=$true}
 $summary | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputRoot 'summary.json') -Encoding utf8
 $summary | ConvertTo-Json -Compress

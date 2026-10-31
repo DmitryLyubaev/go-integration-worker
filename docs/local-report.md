@@ -106,6 +106,10 @@ Compose's three-second stop timeout ended the idle tooling container with exit
 Read-only retained-evidence verification passed with all 167 files unchanged by
 hash and modification time; it used a separately removed one-shot tooling container.
 
-The final independent review and owner integration choice remain pending at this
-checkpoint. No distributed exactly-once delivery, multi-worker fencing/HA,
+One fresh independent review found two Important findings and a Minor overflow
+case, regraded Important for its early-send effect. All three were reproduced
+and fixed in one correction pass, with 84 passing Go test events, two preparation-
+cleanup regressions and full race checks. See the [execution record](execution-record.md).
+The original run above remains evidence for its original source; corrected-source
+runtime verification and the owner integration choice are next. No distributed exactly-once delivery, multi-worker fencing/HA,
 production authentication, external webhook safety or sustained-load claim follows.

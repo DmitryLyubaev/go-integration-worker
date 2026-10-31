@@ -56,4 +56,42 @@ used a separate fresh database, so that fixture is excluded from actual results.
 
 PowerShell formatting checks also required an initialized empty log file, and prose
 line endings were normalized to LF. These corrections did not require a canonical
-repeat. Final independent review and owner integration choice are pending.
+repeat. Owner integration choice remains pending.
+
+## Single independent review and correction pass
+
+The fresh reviewer examined `1e5190e..6f4bedc` and reported two Important findings
+and one Minor: error-body reads overriding status/header decisions, preparation
+failures bypassing cleanup, and positive Retry-After overflow. The last was
+regraded Important because it permits early sends that the agreed cap must stop.
+All three were reproduced and fixed in one pass; no second review was dispatched.
+
+`TestStatusHeadersSurviveInvalidBodies` observed eight RED failures for oversized/
+truncated 401/302/422/429 bodies, then GREEN. Real PostgreSQL/HTTP
+`TestHeaderDecisionsStopFurtherSendsRealDB` observed five RED three-send outcomes,
+then GREEN with one reservation/one send for each stop condition, including overflow.
+The PowerShell controlled-runtime regression observed preparation leaving the
+runtime running, then both partial-up and failed-build cases passed with stopped
+state and a failure cleanup receipt. It makes no actual Docker call.
+
+All-profile verification passed 84 Go test events, zero failures/skips, two separate
+PowerShell cleanup cases, format/modules/vet/build and full Linux race checks.
+The corrected-source frozen runtime validation follows this checkpoint. Original
+canonical evidence is unchanged and preserved separately with source/check logs.
+
+Additional rulings:
+
+- Treat positive Retry-After overflow as Important, alongside lost header limits;
+  it has the same forbidden-early-send effect. Cost: stricter decimal interpretation.
+- Leave multi-worker fencing/HA/load scalability excluded, as agreed. Cost: multiple
+  active workers and production throughput are unsupported.
+- Leave production authentication, rotation, external webhooks and cloud operations
+  excluded. Cost: this local synthetic service must not be repurposed as production.
+- Leave blocking pipes/remote trace filesystems outside the regular local-file setup.
+  Cost: the observed shutdown bound does not cover those destinations.
+- Run the same frozen sample once on corrected source because shared HTTP policy and
+  cleanup code changed. Cost: one additional bounded correctness run, without tuning
+  cases or replacing the original result.
+
+Deferred minors: none after regrading the overflow behavior and fixing it. The
+reviewer's excluded behaviors are recorded above rather than silently dropped.
