@@ -23,5 +23,32 @@ is restricted to local initialization, tests and independent evidence queries.
 
 Use `./scripts/run.ps1 stop` to stop owned services while retaining evidence/data.
 Do not prune shared Docker resources. Raw artifacts, logs, local environment and
-worktrees are ignored. A final measured report will distinguish software checks
-from actual process-recovery observations; no measured results are claimed yet.
+worktrees are ignored. See the [measured local report](docs/local-report.md) and
+[sanitized trace example](docs/trace-example.json).
+
+## Commands and verification
+
+Build the CLI inside tooling, then run `build/p27 enqueue /workspace/path/to/event.json`,
+`build/p27 status [ID]`, `build/p27 worker`, or `build/p27 reconcile ID` through
+`scripts/run.ps1 exec -T tooling`. Start `build/p27 receiver` in a separate owned
+terminal. The receiver binds container-loopback 8127; the demonstration has no
+browser interface or remote listener. Reconciliation reads a receipt, never resends.
+
+```powershell
+./scripts/check.ps1
+# Canonical demonstration requires a clean committed source tree:
+./scripts/demo.ps1
+```
+
+All checks require the real database and run race detection on Linux. Unit-only
+`./scripts/check.ps1 -Profile Unit` checks event parsing, and is not full verification.
+The demo creates a fresh owned database, runs twelve frozen event IDs once, preserves
+timestamped evidence and stops owned containers in finally. A failed run remains
+separate; the script does not automatically repeat it. Review the recorded result
+before deciding whether a corrected run is warranted.
+
+First measured run on 1 November 2026: A1-A8 passed, twelve IDs, twenty worker
+reservations, nineteen worker POSTs plus three identity probes, ten receiver effects.
+Runtime including container cleanup was 24.166 seconds; one correctness sample.
+At-least-once sends and receiver-side atomic deduplication explain the result.
+This is not a claim of exactly-once network delivery or generic webhook replay safety.

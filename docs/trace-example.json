@@ -1,0 +1,31 @@
+{
+  "SourceCommit": "5ab629f2f939e501e3f31bd355ef4c1992f922ab",
+  "Run": "20261031T224036695Z",
+  "EventID": "00000000-0000-0000-0000-000000000001",
+  "Spans": [
+    {
+      "Name": "receiver.export",
+      "TraceID": "5c4f9e541675749da14178f1888cb693",
+      "SpanID": "4725db093983d3aa",
+      "ParentSpanID": "522d235f66118ecc",
+      "StartTime": "2026-10-31T22:40:44.578530263Z",
+      "EndTime": "2026-10-31T22:40:44.599524707Z"
+    },
+    {
+      "Name": "enqueue",
+      "TraceID": "5c4f9e541675749da14178f1888cb693",
+      "SpanID": "5744ba3acba1829e",
+      "ParentSpanID": "0000000000000000",
+      "StartTime": "2026-10-31T22:40:44.444523613Z",
+      "EndTime": "2026-10-31T22:40:44.456428135Z"
+    },
+    {
+      "Name": "attempt",
+      "TraceID": "5c4f9e541675749da14178f1888cb693",
+      "SpanID": "522d235f66118ecc",
+      "ParentSpanID": "5744ba3acba1829e",
+      "StartTime": "2026-10-31T22:40:44.575529757Z",
+      "EndTime": "2026-10-31T22:40:44.600533643Z"
+    }
+  ]
+}
