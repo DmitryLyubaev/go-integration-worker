@@ -1,0 +1,7 @@
+.worktrees/
+.superpowers/
+.local/
+artifacts/
+build/
+.env
+*.log
