@@ -1,6 +1,6 @@
 # Go Integration Worker Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Deliver the approved bounded local Go worker demonstration with durable recovery and source-bound evidence.
 
@@ -104,8 +104,8 @@ AttemptCount int; Ambiguous bool; ClaimToken string; LeaseUntil time.Time;
 Receipt *domain.Receipt}`;
 `ErrConflict` identifies conflicting enqueue without leaking credentials.
 
-- [ ] Inspect prerequisites and shared-host resources, initialize isolated local repo/worktree with personal identity, select/pin compatible runtime/module/image versions. Record exact commands, versions/digests and preparation time; do not start a canonical sample.
-- [ ] Write `TestDecodeCanonicalAndBounds` with reordered/whitespace JSON yielding identical bytes/hash; UUID uppercase normalized lowercase; sale reference 1-64 ASCII letters/digits/underscore/hyphen; AUD and amount 1..100000000 only. Assert duplicate/unknown/missing fields, fractional/exponent money, overflow, trailing JSON and 4097-byte input fail.
+- [x] Inspect prerequisites and shared-host resources, initialize isolated local repo/worktree with personal identity, select/pin compatible runtime/module/image versions. Record exact commands, versions/digests and preparation time; do not start a canonical sample.
+- [x] Write `TestDecodeCanonicalAndBounds` with reordered/whitespace JSON yielding identical bytes/hash; UUID uppercase normalized lowercase; sale reference 1-64 ASCII letters/digits/underscore/hyphen; AUD and amount 1..100000000 only. Assert duplicate/unknown/missing fields, fractional/exponent money, overflow, trailing JSON and 4097-byte input fail.
 
   ```go
   payload, err := domain.Decode(strings.NewReader(`{"event_id":"00000000-0000-0000-0000-000000000001","sale_reference":"A1_1","currency":"AUD","amount_minor":1000}`))
@@ -113,10 +113,10 @@ Receipt *domain.Receipt}`;
   _, err = domain.Decode(strings.NewReader(strings.Repeat(" ", 4097)))
   if err == nil { t.Fatal("oversized input accepted") }
   ```
-- [ ] Run `go test ./internal/domain -run TestDecodeCanonicalAndBounds -count=1`; observe missing implementation/assertion failures, then implement `Decode` with a strict bounded parser and deterministic typed serialization. Re-run and require PASS.
-- [ ] Write `TestEnqueueIdentityRealDB`: exact duplicate returns same job/created=false, conflict leaves original bytes untouched; concurrent exact inserts produce one job. Run `go test ./internal/queue -run TestEnqueueIdentityRealDB -count=1` against actual PostgreSQL; observe behavioral RED.
-- [ ] Implement migrations and `Enqueue`; require real-DB GREEN. Initialization creates worker and receiver roles/schema grants and explicit readiness; worker role cannot write receiver tables. Keep admin connection confined to setup/tests.
-- [ ] Run `go vet ./internal/domain ./internal/queue` and focused tests, record evidence, commit `feat: add canonical events and durable enqueue`.
+- [x] Run `go test ./internal/domain -run TestDecodeCanonicalAndBounds -count=1`; observe missing implementation/assertion failures, then implement `Decode` with a strict bounded parser and deterministic typed serialization. Re-run and require PASS.
+- [x] Write `TestEnqueueIdentityRealDB`: exact duplicate returns same job/created=false, conflict leaves original bytes untouched; concurrent exact inserts produce one job. Run `go test ./internal/queue -run TestEnqueueIdentityRealDB -count=1` against actual PostgreSQL; observe behavioral RED.
+- [x] Implement migrations and `Enqueue`; require real-DB GREEN. Initialization creates worker and receiver roles/schema grants and explicit readiness; worker role cannot write receiver tables. Keep admin connection confined to setup/tests.
+- [x] Run `go vet ./internal/domain ./internal/queue` and focused tests, record evidence, commit `feat: add canonical events and durable enqueue`.
 
 ### Task 2: atomic owned receiver and receipt protocol
 
@@ -130,12 +130,12 @@ receiver tests; extend migrations only for receiver tables/grants.
 `receiver.NewHandler(*Store,FaultController) http.Handler`.
 FaultController is explicit local-test configuration keyed by event ID, never payload input.
 
-- [ ] Write `TestConcurrentApplyRealDB` with simultaneous new exact requests asserting one effect and the same receipt; conflicting reuse changes nothing. Force a transaction error between inserts and assert both receipt/effect absent.
-- [ ] Run `go test ./internal/receiver -run 'TestConcurrentApplyRealDB|TestApplyAtomicRollback' -count=1`; observe RED, implement atomic unique-key/transaction logic, rerun GREEN.
-- [ ] Write `TestHTTPContract` asserting POST 201/200/409, validation rejection, bounded request bodies and matching GET receipt/404. `GET /ready` verifies database access and constant protocol marker `p27-receiver-v1`; other methods return 405 with Allow.
-- [ ] Run `go test ./internal/receiver -run TestHTTPContract -count=1`; observe RED, implement bounded handlers and server read/header/write/idle timeouts, rerun GREEN.
-- [ ] Write `TestFaultsRequireTestMode` and `TestCommitThenCloseRealHTTP`: fault settings rejected outside explicit test mode; 503/422 injections precede effects; after commit a real HTTP connection is closed before response, SQL still has one receipt/effect. Observe RED, implement faults/barriers, require GREEN.
-- [ ] Verify worker/receiver role isolation against real SQL, run receiver tests/race where supported, commit `feat: add atomic synthetic receiver receipts`.
+- [x] Write `TestConcurrentApplyRealDB` with simultaneous new exact requests asserting one effect and the same receipt; conflicting reuse changes nothing. Force a transaction error between inserts and assert both receipt/effect absent.
+- [x] Run `go test ./internal/receiver -run 'TestConcurrentApplyRealDB|TestApplyAtomicRollback' -count=1`; observe RED, implement atomic unique-key/transaction logic, rerun GREEN.
+- [x] Write `TestHTTPContract` asserting POST 201/200/409, validation rejection, bounded request bodies and matching GET receipt/404. `GET /ready` verifies database access and constant protocol marker `p27-receiver-v1`; other methods return 405 with Allow.
+- [x] Run `go test ./internal/receiver -run TestHTTPContract -count=1`; observe RED, implement bounded handlers and server read/header/write/idle timeouts, rerun GREEN.
+- [x] Write `TestFaultsRequireTestMode` and `TestCommitThenCloseRealHTTP`: fault settings rejected outside explicit test mode; 503/422 injections precede effects; after commit a real HTTP connection is closed before response, SQL still has one receipt/effect. Observe RED, implement faults/barriers, require GREEN.
+- [x] Verify worker/receiver role isolation against real SQL, run receiver tests/race where supported, commit `feat: add atomic synthetic receiver receipts`.
 
 ### Task 3: bounded claim ownership, history and recovery
 
@@ -149,11 +149,11 @@ kinds Success/Permanent/Retryable/Unrecognized/Canceled;
 `(*Store).RecoverExpired(context.Context) (int,error)`.
 Attempt history is immutable reservation/outcome records; timing uses database clock.
 
-- [ ] Write `TestClaimReservationsRealDB` asserting exclusive claims, reservation committed before return, 10-second expiry, no open transaction during send, no fourth slot and completion rejected for the wrong token.
-- [ ] Run `go test ./internal/queue -run TestClaimReservationsRealDB -count=1`; observe RED, implement bounded claim/conditional completion, rerun GREEN.
-- [ ] Write `TestRecoveryAndStickyAmbiguityRealDB`: abandoned reservation remains counted; expired third claim becomes uncertain; ambiguous first attempt followed by no-effect 503 exhaustion remains uncertain. Permanent no-effect rejection is failed; matching receipt is delivered. Use fixture timestamps only in software tests, not canonical recovery evidence.
-- [ ] Run the named regression RED, implement recovery and append-only outcomes/monotonic ambiguity; rerun GREEN. Preserve stale-token failure behavior through recovery.
-- [ ] Cover persisted retry due times 100/200 ms, no claims from terminal/delivered rows, and 1-second database deadlines using real blocked queries. Run all queue tests, commit `feat: persist bounded claims and restart recovery`.
+- [x] Write `TestClaimReservationsRealDB` asserting exclusive claims, reservation committed before return, 10-second expiry, no open transaction during send, no fourth slot and completion rejected for the wrong token.
+- [x] Run `go test ./internal/queue -run TestClaimReservationsRealDB -count=1`; observe RED, implement bounded claim/conditional completion, rerun GREEN.
+- [x] Write `TestRecoveryAndStickyAmbiguityRealDB`: abandoned reservation remains counted; expired third claim becomes uncertain; ambiguous first attempt followed by no-effect 503 exhaustion remains uncertain. Permanent no-effect rejection is failed; matching receipt is delivered. Use fixture timestamps only in software tests, not canonical recovery evidence.
+- [x] Run the named regression RED, implement recovery and append-only outcomes/monotonic ambiguity; rerun GREEN. Preserve stale-token failure behavior through recovery.
+- [x] Cover persisted retry due times 100/200 ms, no claims from terminal/delivered rows, and 1-second database deadlines using real blocked queries. Run all queue tests, commit `feat: persist bounded claims and restart recovery`.
 
 ### Task 4: HTTP delivery, two goroutines and shutdown
 
@@ -166,12 +166,12 @@ Attempt history is immutable reservation/outcome records; timing uses database c
 `delivery.Run(context.Context,*queue.Store,*Client,Config) error`.
 An internal optional test barrier runs after committed claim/before send only in test mode.
 
-- [ ] Write `TestHTTPClassificationAndBounds`: match ID/hash/nonempty receipt; reject oversized/truncated/mismatched success; classify 400/409/422 definitive, 408/429/500/502/503/504 retryable no-effect under owned contract, other statuses uncertain/stop. Assert 500 ms connect and 2-second total bounds; Retry-After integer/date at <=1 second honored and larger values stop visibly.
-- [ ] Run `go test ./internal/delivery -run TestHTTPClassificationAndBounds -count=1`; observe RED, implement reusable client and classifications, rerun GREEN.
-- [ ] Write `TestWireSendCountAndRedirectDenied`: count wire requests on a reused connection closed around a POST, require one wire POST per reservation; do not attach an Idempotency-Key header or GetBody behavior that enables transparent net/http replay. Cross-host redirects receive zero requests. Observe RED, implement exact transport policy, rerun GREEN.
-- [ ] Write `TestTwoWorkersCancelAndJoin`: a controlled HTTP gate observes exactly two active sends across four jobs; no third claim/send; stopping prevents new claims, cancels contexts after one-second drain, joins owned goroutines and finishes within five seconds. Test final bookkeeping failure leaves recoverable leases, not delivered/rolled-back claims.
-- [ ] Observe RED with `go test ./internal/delivery -run TestTwoWorkersCancelAndJoin -count=1`; implement two fixed goroutines and bounded cleanup context, rerun GREEN. Receiver fixture may commit after cancellation; assert outcome is ambiguous.
-- [ ] Run `go test -race ./internal/delivery ./internal/queue ./internal/receiver` in supported Linux with real DB, record actual environment, commit `feat: deliver with bounded retries and context shutdown`.
+- [x] Write `TestHTTPClassificationAndBounds`: match ID/hash/nonempty receipt; reject oversized/truncated/mismatched success; classify 400/409/422 definitive, 408/429/500/502/503/504 retryable no-effect under owned contract, other statuses uncertain/stop. Assert 500 ms connect and 2-second total bounds; Retry-After integer/date at <=1 second honored and larger values stop visibly.
+- [x] Run `go test ./internal/delivery -run TestHTTPClassificationAndBounds -count=1`; observe RED, implement reusable client and classifications, rerun GREEN.
+- [x] Write `TestWireSendCountAndRedirectDenied`: count wire requests on a reused connection closed around a POST, require one wire POST per reservation; do not attach an Idempotency-Key header or GetBody behavior that enables transparent net/http replay. Cross-host redirects receive zero requests. Observe RED, implement exact transport policy, rerun GREEN.
+- [x] Write `TestTwoWorkersCancelAndJoin`: a controlled HTTP gate observes exactly two active sends across four jobs; no third claim/send; stopping prevents new claims, cancels contexts after one-second drain, joins owned goroutines and finishes within five seconds. Test final bookkeeping failure leaves recoverable leases, not delivered/rolled-back claims.
+- [x] Observe RED with `go test ./internal/delivery -run TestTwoWorkersCancelAndJoin -count=1`; implement two fixed goroutines and bounded cleanup context, rerun GREEN. Receiver fixture may commit after cancellation; assert outcome is ambiguous.
+- [x] Run `go test -race ./internal/delivery ./internal/queue ./internal/receiver` in supported Linux with real DB, record actual environment, commit `feat: deliver with bounded retries and context shutdown`.
 
 ### Task 5: runnable CLI, reconciliation and local traces
 
@@ -185,12 +185,12 @@ internal/telemetry/trace.go and tests; scripts/check.ps1, README instructions.
 Support enqueue, worker, receiver, status and reconcile only. Native signal wiring
 maps interrupt/SIGTERM to the worker stop context; container tests use actual SIGTERM.
 
-- [ ] Write `TestCLIEnqueueStatusAndExitCodes`: valid enqueue/duplicate/status succeed, conflict/invalid command/missing runtime configuration fail clearly without dumping a DSN. Test actual built executable, not merely direct dispatch.
-- [ ] Observe RED; implement dispatch and process wiring with explicit bounded config, signal handling and structured output, rerun GREEN.
-- [ ] Write `TestReconcileReadOnlyAndRaceRealDB`: matching receipt updates failed/uncertain only, preserving all attempt records; unavailable/404/hash mismatch leaves unchanged; stale completion cannot overwrite reconciled delivery. Count HTTP POSTs before/after to prove zero resends.
-- [ ] Run reconciliation test RED, implement read-only lookup and conditional SQL transition, rerun GREEN.
-- [ ] Write `TestTraceLinkAndFlush`: persist/link enqueue trace identity across restart, propagate W3C traceparent to receiver, capture attempt/receiver spans with event/attempt/outcome attributes and no secrets. Export/flush failure is reported within shutdown bound and never rewrites business outcome. Observe RED, implement minimal SDK/manual spans and local capture, rerun GREEN.
-- [ ] Implement check.ps1 profiles for format/vet/build/unit/real-DB/race with fail-on-required-missing-prerequisite and retained output. Require clean formatting and all selected checks PASS, commit `feat: expose worker CLI reconciliation and trace capture`.
+- [x] Write `TestCLIEnqueueStatusAndExitCodes`: valid enqueue/duplicate/status succeed, conflict/invalid command/missing runtime configuration fail clearly without dumping a DSN. Test actual built executable, not merely direct dispatch.
+- [x] Observe RED; implement dispatch and process wiring with explicit bounded config, signal handling and structured output, rerun GREEN.
+- [x] Write `TestReconcileReadOnlyAndRaceRealDB`: matching receipt updates failed/uncertain only, preserving all attempt records; unavailable/404/hash mismatch leaves unchanged; stale completion cannot overwrite reconciled delivery. Count HTTP POSTs before/after to prove zero resends.
+- [x] Run reconciliation test RED, implement read-only lookup and conditional SQL transition, rerun GREEN.
+- [x] Write `TestTraceLinkAndFlush`: persist/link enqueue trace identity across restart, propagate W3C traceparent to receiver, capture attempt/receiver spans with event/attempt/outcome attributes and no secrets. Export/flush failure is reported within shutdown bound and never rewrites business outcome. Observe RED, implement minimal SDK/manual spans and local capture, rerun GREEN.
+- [x] Implement check.ps1 profiles for format/vet/build/unit/real-DB/race with fail-on-required-missing-prerequisite and retained output. Require clean formatting and all selected checks PASS, commit `feat: expose worker CLI reconciliation and trace capture`.
 
 ### Task 6: frozen actual-process acceptance and measured report
 
@@ -221,14 +221,14 @@ Conflicting probes change amount to 1001 under the same ID.
 | A8 | 3 | 3 | 1 receipt GET | 1 |
 | Total | 20 | 19 | 3 POST, 1 GET | 10 |
 
-- [ ] Write `TestVerifyRejectsMissingAndChangedEvidence`: missing case/process-exit proof, altered fixture/hash/effect count, absent required trace or absent cleanup observations fails. Unit tests exercise verification only, never stand in for runtime evidence. Observe RED, implement narrow verifier, rerun GREEN.
-- [ ] Implement fixture and deterministic scenario barriers: A1 two in-flight; A2 duplicates; A3 503->success and 422; A4 three 503; A5 stop/cancel then release late commit and restart; A6 real KILL after committed claim before send, observe process exit then wait genuine 10-second expiry; A7 actual postcommit socket close; A8 all three responses lost, restart proves no fourth POST, receipt reconciliation. No automatic whole-study rerun.
-- [ ] Implement demo.ps1 preparation/readiness, exact-source builds, private timestamped output folder and a five-minute runtime watchdog including owned cleanup. Receiver protocol marker/SQL readiness must match before cases; unexpected source changes/counts/failure stop the sample and preserve partial results. Separate preparation from canonical time.
-- [ ] Run `scripts/check.ps1` with all required profiles; require format/vet/build/unit/real-DB/race success with no hidden skipped required check. Commit executable/fixtures before canonical execution; do not manufacture measured report figures.
-- [ ] Run `scripts/demo.ps1` once against that clean committed source. Require A1-A8, exactly 12 IDs/20 reservations/19 worker POSTs/3 protocol POSTs/1 GET/10 effects, no fourth attempt, max worker concurrency two, shutdown <=5 seconds and complete sample <=300 seconds. Compare independent receiver SQL and process/wire logs, not just worker states.
-- [ ] Stop owned processes/containers in finally, preserve volumes/raw evidence, verify listener/container absence. If sample fails, report actual outcome; any corrected run gets a new source-bound directory and explicit reason, retaining original failure.
-- [ ] Write dated safe report with counts/timings/limits, trace example and state/sequence diagram. Request one fresh whole-branch code review; reproduce/fix Important findings in one correction pass with relevant tests. Re-run only checks/acceptance whose evidence changed, clearly preserving original sample/source.
-- [ ] Commit source/report closeout, update portfolio tracker/handover with exact verified state and deferred minors. Present local integration choice under finishing-branch skill; preserve evidence before retiring any worktree. Do not push/create a public repository or hosted CI.
+- [x] Write `TestVerifyRejectsMissingAndChangedEvidence`: missing case/process-exit proof, altered fixture/hash/effect count, absent required trace or absent cleanup observations fails. Unit tests exercise verification only, never stand in for runtime evidence. Observe RED, implement narrow verifier, rerun GREEN.
+- [x] Implement fixture and deterministic scenario barriers: A1 two in-flight; A2 duplicates; A3 503->success and 422; A4 three 503; A5 stop/cancel then release late commit and restart; A6 real KILL after committed claim before send, observe process exit then wait genuine 10-second expiry; A7 actual postcommit socket close; A8 all three responses lost, restart proves no fourth POST, receipt reconciliation. No automatic whole-study rerun.
+- [x] Implement demo.ps1 preparation/readiness, exact-source builds, private timestamped output folder and a five-minute runtime watchdog including owned cleanup. Receiver protocol marker/SQL readiness must match before cases; unexpected source changes/counts/failure stop the sample and preserve partial results. Separate preparation from canonical time.
+- [x] Run `scripts/check.ps1` with all required profiles; require format/vet/build/unit/real-DB/race success with no hidden skipped required check. Commit executable/fixtures before canonical execution; do not manufacture measured report figures.
+- [x] Run `scripts/demo.ps1` once against that clean committed source. Require A1-A8, exactly 12 IDs/20 reservations/19 worker POSTs/3 protocol POSTs/1 GET/10 effects, no fourth attempt, max worker concurrency two, shutdown <=5 seconds and complete sample <=300 seconds. Compare independent receiver SQL and process/wire logs, not just worker states.
+- [x] Stop owned processes/containers in finally, preserve volumes/raw evidence, verify listener/container absence. If sample fails, report actual outcome; any corrected run gets a new source-bound directory and explicit reason, retaining original failure.
+- [x] Write dated safe report with counts/timings/limits, trace example and state/sequence diagram. Request one fresh whole-branch code review; reproduce/fix Important findings in one correction pass with relevant tests. Re-run only checks/acceptance whose evidence changed, clearly preserving original sample/source.
+- [x] Commit source/report closeout, update portfolio tracker/handover with exact verified state and deferred minors. Present local integration choice under finishing-branch skill; preserve evidence before retiring any worktree. Do not push/create a public repository or hosted CI.
 
 ## Plan self-review and execution handoff
 
@@ -243,3 +243,10 @@ one final independent review keep this local correctness demonstration proportio
 Subagent-driven execution is an alternative with separate implementer/reviewer gates
 per task, at additional context/review cost. Owner approved Native execution;
 executing-plans governs task-by-task work and the final independent review.
+
+## Final local checkpoint
+
+All six implementation tasks, the single review correction pass and corrected-source
+A1-A8 verification are complete. Source a4c4136 passed84 Go test events, two
+PowerShell cleanup cases and full Linux race checks. Both raw runs are retained;
+source/report closeout awaits only the owner's integration choice. No public action.

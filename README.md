@@ -47,8 +47,10 @@ timestamped evidence and stops owned containers in finally. A failed run remains
 separate; the script does not automatically repeat it. Review the recorded result
 before deciding whether a corrected run is warranted.
 
-First measured run on 1 November 2026: A1-A8 passed, twelve IDs, twenty worker
+Corrected source on 1 November 2026: A1-A8 passed, twelve IDs, twenty worker
 reservations, nineteen worker POSTs plus three identity probes, ten receiver effects.
-Runtime including container cleanup was 24.166 seconds; one correctness sample.
+Runtime including container cleanup was 24.272 seconds; one corrected-source sample.
+The original source's successful sample remains separate. Software verification
+passed 84 Go test events, two preparation-cleanup cases and full Linux race checks.
 At-least-once sends and receiver-side atomic deduplication explain the result.
 This is not a claim of exactly-once network delivery or generic webhook replay safety.

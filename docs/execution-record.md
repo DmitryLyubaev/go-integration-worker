@@ -76,8 +76,13 @@ state and a failure cleanup receipt. It makes no actual Docker call.
 
 All-profile verification passed 84 Go test events, zero failures/skips, two separate
 PowerShell cleanup cases, format/modules/vet/build and full Linux race checks.
-The corrected-source frozen runtime validation follows this checkpoint. Original
-canonical evidence is unchanged and preserved separately with source/check logs.
+Corrected source `a4c4136` passed the unchanged frozen A1-A8 sample in run
+`20261031T225855490Z`: the same twelve IDs, twenty reservations, nineteen worker
+POSTs, three protocol POSTs, one receipt GET and ten effects. Runtime15.735s with
+process cleanup,24.272s with containers; prep4.563s separate, max graceful stop
+1.018s rounded up. Both containers stopped; three volumes retained. Both raw
+bundles passed read-only verification with334 files unchanged by content/mtime.
+Original canonical evidence is preserved separately with source/check logs.
 
 Additional rulings:
 

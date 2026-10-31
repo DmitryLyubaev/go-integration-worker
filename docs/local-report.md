@@ -5,9 +5,14 @@ not a throughput benchmark, production SLA or evidence of commercial Go tenure.
 
 ## Source and method
 
-Executable source: `5ab629f2f939e501e3f31bd355ef4c1992f922ab`.
-Private run: `20261031T224036695Z`, fresh database `p27_run_67f0aa2c5329`.
-The first canonical run passed A1-A8 without a corrected or favorable repeat.
+Final corrected executable: `a4c413608dc4680305020a7e94beeb3de0b5d96d`.
+Private corrected-source run: `20261031T225855490Z`, fresh database
+`p27_run_0be8492b3f2b`. It passed A1-A8 with the unchanged frozen expectations.
+
+Original executable: `5ab629f2f939e501e3f31bd355ef4c1992f922ab`, private run
+`20261031T224036695Z`, database `p27_run_67f0aa2c5329`. It passed on its first
+canonical attempt. The additional run validates review corrections to shared HTTP
+and cleanup code; it does not replace the original or tune the sample.
 All twelve event IDs, values, fault settings and expected counts were frozen in
 the committed fixture/design/plan before execution. Source-file hashes were
 checked before and after the run. The retained bundle contains a source archive,
@@ -22,6 +27,8 @@ No global runtime/security/PATH modification, provider inference, paid service,
 application cloud deployment or public source publication was needed.
 
 ## Observed outcomes
+
+Each run independently matched the following counts in its fresh database.
 
 | Group | Event IDs | Worker reservations | Worker POSTs | Separate probes | Receiver effects |
 |---|---:|---:|---:|---|---:|
@@ -57,18 +64,25 @@ worker signals, HTTP transport errors, PostgreSQL commits and process restarts
 are real observations. They do not establish behavior for an arbitrary receiver.
 Replay safety depends on this owned receiver's durable identity/atomicity contract.
 
-Runtime, including owned application-process cleanup: **15.458 seconds**.
-Runtime including outer container cleanup: **24.166 seconds**, against the
-300-second sample bound. Preparation/build: **6.018 seconds**, reported separately.
-The largest observed graceful worker shutdown was **1.015 seconds rounded up**,
-below the five-second bound. These figures have sample size one.
+| Measured duration | Original source | Corrected source |
+|---|---:|---:|
+| Runtime including application-process cleanup | 15.458 s | 15.735 s |
+| Runtime including outer container cleanup | 24.166 s | 24.272 s |
+| Preparation/build, separate | 6.018 s | 4.563 s |
+| Maximum graceful worker shutdown, rounded up | 1.015 s | 1.018 s |
+
+Both complete samples were below 300 seconds; all observed graceful worker stops
+were below five seconds. Each duration describes one run on its named source.
+The two runs are correctness observations, not a latency distribution or load study.
 
 ## Software checks and tracing
 
-Before canonical execution, the All profile passed formatting, module checksum
+Before each canonical execution, the All profile passed formatting, module checksum
 verification, vet, build, real PostgreSQL/HTTP checks and full Linux race detection.
-There were **69 passing test events including subtests**, zero failing/skipped
-test events; these are software checks, not 69 independent runtime scenarios.
+The original source had **69 passing Go test events including subtests**. Corrected
+source had **84 passing Go test events**, zero failing/skipped events, plus two
+separate PowerShell preparation-cleanup cases. These are software checks, not
+independent runtime scenarios.
 The race environment was Linux amd64 with CGO enabled. Actual canonical recovery
 was verified separately rather than substituted with mocked SQL or simulated kills.
 
@@ -78,10 +92,11 @@ shutdown/cancellation, read-only reconciliation, trace linking/failure and evide
 mutation rejection. The 500 ms connect deadline is configured; this sample does
 not independently characterize Internet connection timeout behavior.
 
-[Sanitized trace example](trace-example.json) retains the actual enqueue, durable
+[Sanitized corrected-source trace](trace-example.json) retains the actual enqueue, durable
 attempt and receiver span identities/times for one A1 event. W3C propagation links
 the spans, and the stored enqueue parent survives restart. Goroutine counts and
 task joins were observed; no universal goroutine-leak detector is claimed.
+The [original trace](trace-example-original.json) is retained separately.
 
 ```mermaid
 stateDiagram-v2
@@ -103,13 +118,15 @@ no owned running container remained. The database and two build/module cache
 volumes were retained for evidence and review; other projects were untouched.
 Compose's three-second stop timeout ended the idle tooling container with exit
 137 and OOMKilled=false, after its application processes had already exited.
-Read-only retained-evidence verification passed with all 167 files unchanged by
-hash and modification time; it used a separately removed one-shot tooling container.
+Read-only retained-evidence verification passed for both bundles, all 334 files
+unchanged by hash and modification time. Separately removed one-shot tooling
+containers performed these readbacks without starting the database.
 
 One fresh independent review found two Important findings and a Minor overflow
 case, regraded Important for its early-send effect. All three were reproduced
 and fixed in one correction pass, with 84 passing Go test events, two preparation-
 cleanup regressions and full race checks. See the [execution record](execution-record.md).
-The original run above remains evidence for its original source; corrected-source
-runtime verification and the owner integration choice are next. No distributed exactly-once delivery, multi-worker fencing/HA,
+The corrected-source runtime verification also passed; no second independent review
+was performed under the approved single-review workflow. No deferred minors remain.
+Only the owner's local integration choice is pending. No distributed exactly-once delivery, multi-worker fencing/HA,
 production authentication, external webhook safety or sustained-load claim follows.
