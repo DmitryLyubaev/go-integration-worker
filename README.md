@@ -4,6 +4,10 @@ Bounded local portfolio demonstration, built from scratch with synthetic sales
 exports. Go, PostgreSQL, HTTP and local OpenTelemetry traces. This is not a
 production service or a throughput benchmark. No paid or cloud resources.
 
+Source: [DmitryLyubaev/go-integration-worker](https://github.com/DmitryLyubaev/go-integration-worker).
+Read the [measured local report](docs/local-report.md) for results and limits,
+and the [integration record](docs/integration-report.md) for verification details.
+
 ## Local setup
 
 Windows uses the existing Ubuntu WSL2 Docker engine. Keep that distribution running

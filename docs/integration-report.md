@@ -3,7 +3,7 @@
 Completed 1 November 2026, Brisbane, after Dmitry selected option 1.
 
 Primary `main` fast-forwarded from `1e5190e` to reviewed branch head `e20fcb2`.
-The product repository has no remote; integration was local.
+At this local integration checkpoint the product repository had no remote.
 
 ## Merged-checkout verification
 
@@ -40,5 +40,22 @@ the fully merged `codex/local` branch was deleted. Primary main retains the sour
 Both owned containers are stopped; the database and two cache volumes remain.
 The temporary integration keepalive is cleaned up individually, without WSL shutdown.
 
-The approved bounded local milestone is complete. Public source publication,
-hosted CI, paid services and cloud application deployment remain uncommissioned.
+The approved bounded local milestone is complete. At this checkpoint public source
+publication, hosted CI, paid services and cloud deployment were uncommissioned.
+
+## Public source publication follow-up
+
+On 1 November 2026 Dmitry approved creating the public
+[go-integration-worker repository](https://github.com/DmitryLyubaev/go-integration-worker)
+and pushing the reviewed source, tests, safe reports and trace excerpts. The
+pre-publication audit covered all 11 commits and 82 historical blobs through
+`5591590`, checking selected credential/private-key/employer markers and forbidden
+raw-evidence/environment/cache paths, with no selected findings. This was a targeted
+audit, not a guarantee against every possible secret. Demo credentials are deliberately
+public and documented in the README.
+
+The publication follow-up changes documentation only. The measured source identities
+and previous software verification remain as recorded above; the canonical scenarios
+are not repeated for publication. Raw evidence, private archives, builds, caches and
+actual `.env` files remain ignored. Hosted CI and cloud deployment are outside this
+publication scope.
