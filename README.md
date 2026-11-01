@@ -9,6 +9,8 @@ production service or a throughput benchmark. No paid or cloud resources.
 Windows uses the existing Ubuntu WSL2 Docker engine. Keep that distribution running
 in an owned foreground session while commands execute; do not shut down shared WSL.
 No global Go install is needed. On Linux, use the same pinned Compose images.
+Tooling disables optional Go VCS stamping for mounted Windows checkouts. The
+acceptance source manifest records the exact commit and source-file hashes.
 
 ```powershell
 ./scripts/run.ps1 up -d

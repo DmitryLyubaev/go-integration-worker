@@ -128,5 +128,7 @@ and fixed in one correction pass, with 84 passing Go test events, two preparatio
 cleanup regressions and full race checks. See the [execution record](execution-record.md).
 The corrected-source runtime verification also passed; no second independent review
 was performed under the approved single-review workflow. No deferred minors remain.
-Only the owner's local integration choice is pending. No distributed exactly-once delivery, multi-worker fencing/HA,
+Dmitry selected local integration; merged-checkout checks, evidence preservation
+and cleanup are recorded in the [integration closeout](integration-report.md).
+No distributed exactly-once delivery, multi-worker fencing/HA,
 production authentication, external webhook safety or sustained-load claim follows.

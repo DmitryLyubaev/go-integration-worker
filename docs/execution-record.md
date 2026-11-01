@@ -56,7 +56,8 @@ used a separate fresh database, so that fixture is excluded from actual results.
 
 PowerShell formatting checks also required an initialized empty log file, and prose
 line endings were normalized to LF. These corrections did not require a canonical
-repeat. Owner integration choice remains pending.
+repeat. Dmitry subsequently selected local integration; see the
+[integration closeout](integration-report.md) for merged-source checks and cleanup.
 
 ## Single independent review and correction pass
 

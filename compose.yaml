@@ -22,6 +22,7 @@ services:
     volumes: [".:/workspace", "gomod:/go/pkg/mod", "gocache:/root/.cache/go-build"]
     environment:
       GOTOOLCHAIN: local
+      GOFLAGS: -buildvcs=false
       P27_TEST_DSN: postgres://p27_admin:p27-local-admin@db:5432/p27?sslmode=disable
       P27_WORKER_DSN: postgres://p27_worker:p27-local-worker@db:5432/p27?sslmode=disable
       P27_RECEIVER_DSN: postgres://p27_receiver:p27-local-receiver@db:5432/p27?sslmode=disable

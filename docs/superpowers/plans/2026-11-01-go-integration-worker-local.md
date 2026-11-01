@@ -249,4 +249,6 @@ executing-plans governs task-by-task work and the final independent review.
 All six implementation tasks, the single review correction pass and corrected-source
 A1-A8 verification are complete. Source a4c4136 passed84 Go test events, two
 PowerShell cleanup cases and full Linux race checks. Both raw runs are retained;
-source/report closeout awaits only the owner's integration choice. No public action.
+source/report closeout was integrated locally after Dmitry selected option1.
+Merged-source checks and preservation passed; see docs/integration-report.md.
+No public action.
